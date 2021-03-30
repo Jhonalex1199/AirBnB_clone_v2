@@ -149,7 +149,6 @@ class HBNBCommand(cmd.Cmd):
         new_instance = HBNBCommand.classes[class_name]()
         for key, value in kwargs.items():
             setattr(new_instance, key, value)
-
         print(new_instance.id)
         new_instance.save()
 
@@ -228,17 +227,29 @@ class HBNBCommand(cmd.Cmd):
         """ Shows all objects, or all objects of a class"""
         print_list = []
 
-        if args:
-            args = args.split(' ')[0]  # remove possible trailing args
-            if args not in HBNBCommand.classes:
-                print("** class doesn't exist **")
-                return
-            for k, v in storage._FileStorage__objects.items():
-                if k.split('.')[0] == args:
+        if os.getenv("HBNB_TYPE_STORAGE") == 'db':
+            if args:
+                args = args.split(' ')[0]  # remove possible trailing args
+                if args not in HBNBCommand.classes:
+                    print("** class doesn't exist **")
+                    return
+                for k, v in storage.all(eval(args)).items():
+                    print_list.append(str(v))
+            else:
+                for k, v in storage.all().items():
                     print_list.append(str(v))
         else:
-            for k, v in storage._FileStorage__objects.items():
-                print_list.append(str(v))
+            if args:
+                args = args.split(' ')[0]  # remove possible trailing args
+                if args not in HBNBCommand.classes:
+                    print("** class doesn't exist **")
+                    return
+                for k, v in storage._FileStorage__objects.items():
+                    if k.split('.')[0] == args:
+                        print_list.append(str(v))
+            else:
+                for k, v in storage._FileStorage__objects.items():
+                    print_list.append(str(v))
 
         print(print_list)
 
